@@ -41,16 +41,11 @@ import java.util.function.Supplier;
 
 @SuppressWarnings("deprecation")
 public class BackpackBlock extends BaseEntityBlock implements SimpleWaterloggedBlock {
-    public static final DirectionProperty FACING;
-    public static final ResourceLocation CONTENTS;
-    public static final BooleanProperty WATERLOGGED;
-    private final BackpackType backpackType;
 
-    static {
-        FACING = HorizontalDirectionalBlock.FACING;
-        WATERLOGGED = BlockStateProperties.WATERLOGGED;
-        CONTENTS = new ResourceLocation("contents");
-    }
+    public static final DirectionProperty FACING = HorizontalDirectionalBlock.FACING;
+    public static final ResourceLocation CONTENTS = new ResourceLocation("contents");
+    public static final BooleanProperty WATERLOGGED = BlockStateProperties.WATERLOGGED;
+    private final BackpackType backpackType;
 
     public BackpackBlock(Properties properties, BackpackType backpackType) {
         super(properties);
@@ -58,71 +53,13 @@ public class BackpackBlock extends BaseEntityBlock implements SimpleWaterloggedB
         this.registerDefaultState(this.stateDefinition.any().setValue(FACING, Direction.NORTH).setValue(WATERLOGGED, false));
     }
 
-    private static final Supplier<VoxelShape> SMALL_BACKPACK = () -> {
-        VoxelShape shape = Shapes.empty();
-        shape = Shapes.join(shape, Shapes.box(0.4375, 0.375, 0.375, 0.5625, 0.5, 0.4375), BooleanOp.OR);
-        shape = Shapes.join(shape, Shapes.box(0.25, 0, 0.4375, 0.75, 0.625, 0.75), BooleanOp.OR);
-        shape = Shapes.join(shape, Shapes.box(0.3125, 0, 0.3125, 0.6875, 0.3125, 0.4375), BooleanOp.OR);
-        return shape;
-    };
-
-    private static final Supplier<VoxelShape> LARGE_BACKPACK = () -> {
-        VoxelShape shape = Shapes.empty();
-        shape = Shapes.join(shape, Shapes.box(0.1875, 0, 0.4375, 0.8125, 0.75, 0.6875), BooleanOp.OR);
-        shape = Shapes.join(shape, Shapes.box(0.25, 0, 0.3125, 0.75, 0.375, 0.4375), BooleanOp.OR);
-        shape = Shapes.join(shape, Shapes.box(0.4375, 0.5, 0.375, 0.5625, 0.625, 0.4375), BooleanOp.OR);
-        shape = Shapes.join(shape, Shapes.box(0.125, 0.75, 0.375, 0.875, 1.0625, 0.6875), BooleanOp.OR);
-        return shape;
-    };
-
-    private static final Supplier<VoxelShape> WANDERER_BACKPACK = () -> {
-        VoxelShape shape = Shapes.empty();
-        shape = Shapes.join(shape, Shapes.box(0.125, 0.5, 0.4375, 0.875, 0.6875, 0.625), BooleanOp.OR);
-        shape = Shapes.join(shape, Shapes.box(0.1875, 0.25, 0.3125, 0.8125, 0.5, 0.6875), BooleanOp.OR);
-        shape = Shapes.join(shape, Shapes.box(0.1875, 0, 0.3125, 0.8125, 0.5, 0.6875), BooleanOp.OR);
-        return shape;
-    };
-
-    private static final Supplier<VoxelShape> WANDERER_BAG = () -> {
-        VoxelShape shape = Shapes.empty();
-        shape = Shapes.join(shape, Shapes.box(0.25, 0, 0.3125, 0.75, 0.625, 0.6875), BooleanOp.OR);
-        shape = Shapes.join(shape, Shapes.box(0.125, 0, 0.375, 0.25, 0.25, 0.625), BooleanOp.OR);
-        shape = Shapes.join(shape, Shapes.box(0.75, 0, 0.375, 0.875, 0.25, 0.625), BooleanOp.OR);
-        return shape;
-    };
-
-    private static final Supplier<VoxelShape> SHEEPBAG = () -> {
-        VoxelShape shape = Shapes.empty();
-        shape = Shapes.join(shape, Shapes.box(0.34375, 0.4375, 0.40625, 0.65625, 0.75, 0.71875), BooleanOp.OR);
-        shape = Shapes.join(shape, Shapes.box(0.28125, 0, 0.46875, 0.71875, 0.4375, 0.71875), BooleanOp.OR);
-        shape = Shapes.join(shape, Shapes.box(0.28125, 0, 0.34375, 0.40625, 0.125, 0.46875), BooleanOp.OR);
-        shape = Shapes.join(shape, Shapes.box(0.59375, 0, 0.34375, 0.71875, 0.125, 0.46875), BooleanOp.OR);
-        shape = Shapes.join(shape, Shapes.box(0.28125, 0.3125, 0.34375, 0.40625, 0.4375, 0.46875), BooleanOp.OR);
-        shape = Shapes.join(shape, Shapes.box(0.59375, 0.3125, 0.34375, 0.71875, 0.4375, 0.46875), BooleanOp.OR);
-        return shape;
-    };
-
-    private static final Supplier<VoxelShape> GOODYBAG = () -> {
-        VoxelShape shape = Shapes.empty();
-        shape = Shapes.join(shape, Shapes.box(0.125, 0, 0.25, 0.75, 0.625, 0.625), BooleanOp.OR);
-        shape = Shapes.join(shape, Shapes.box(0.75, 0, 0.25, 0.9375, 0.3125, 0.625), BooleanOp.OR);
-        shape = Shapes.join(shape, Shapes.box(0, 0, 0.25, 0.125, 0.3125, 0.625), BooleanOp.OR);
-        shape = Shapes.join(shape, Shapes.box(0.1875, 0, 0.125, 0.6875, 0.3125, 0.25), BooleanOp.OR);
-        shape = Shapes.join(shape, Shapes.box(0.1875, 0, 0.625, 0.5, 0.75, 0.9375), BooleanOp.OR);
-        shape = Shapes.join(shape, Shapes.box(0.125, 0.4375, 0.25, 0.75, 0.625, 0.625), BooleanOp.OR);
-        shape = Shapes.join(shape, Shapes.box(0.375, 0.375, 0.1875, 0.5, 0.5, 0.25), BooleanOp.OR);
-        shape = Shapes.join(shape, Shapes.box(0.003125, 0.125, 0.3125, 0.128125, 0.5, 0.4375), BooleanOp.OR);
-        shape = Shapes.join(shape, Shapes.box(0.003125, 0.125, 0.4375, 0.128125, 0.75, 0.5625), BooleanOp.OR);
-        return shape;
-    };
-
     public static final Map<BackpackType, Map<Direction, VoxelShape>> SHAPES = net.minecraft.Util.make(new HashMap<>(), map -> {
-        map.put(BackpackType.SMALL_BACKPACK, generateShapes(SMALL_BACKPACK));
-        map.put(BackpackType.LARGE_BACKPACK, generateShapes(LARGE_BACKPACK));
-        map.put(BackpackType.WANDERER_BACKPACK, generateShapes(WANDERER_BACKPACK));
-        map.put(BackpackType.WANDERER_BAG, generateShapes(WANDERER_BAG));
-        map.put(BackpackType.GOODYBAG, generateShapes(GOODYBAG));
-        map.put(BackpackType.SHEEPBAG, generateShapes(SHEEPBAG));
+        map.put(BackpackType.SMALL_BACKPACK, generateShapes(BackpackBlockShapes.SMALL_BACKPACK));
+        map.put(BackpackType.LARGE_BACKPACK, generateShapes(BackpackBlockShapes.LARGE_BACKPACK));
+        map.put(BackpackType.WANDERER_BACKPACK, generateShapes(BackpackBlockShapes.WANDERER_BACKPACK));
+        map.put(BackpackType.WANDERER_BAG, generateShapes(BackpackBlockShapes.WANDERER_BAG));
+        map.put(BackpackType.GOODYBAG, generateShapes(BackpackBlockShapes.GOODYBAG));
+        map.put(BackpackType.SHEEPBAG, generateShapes(BackpackBlockShapes.SHEEPBAG));
     });
 
     private static Map<Direction, VoxelShape> generateShapes(Supplier<VoxelShape> shapeSupplier) {
@@ -143,95 +80,73 @@ public class BackpackBlock extends BaseEntityBlock implements SimpleWaterloggedB
     }
 
     public enum BackpackType {
-        WANDERER_BACKPACK, LARGE_BACKPACK, SMALL_BACKPACK, WANDERER_BAG, SHEEPBAG, GOODYBAG
-    }
-/*
-    @Override
-    public @NotNull InteractionResult use(BlockState blockState, Level level, BlockPos blockPos, Player player, InteractionHand interactionHand, BlockHitResult blockHitResult) {
-        if (level.isClientSide) {
-            return InteractionResult.SUCCESS;
-        }
-        else {
-            BlockEntity blockEntity = level.getBlockEntity(blockPos);
-            if (blockEntity instanceof BackpackBlockEntity) {
-
-                if (this.backpackType != BackpackType.ENDERPACK) {
-                    player.openMenu((BackpackBlockEntity) blockEntity);
-                } else {
-                    player.openMenu(new SimpleMenuProvider((containerID, inventory, contextualPlayer) -> {
-                        return ChestMenu.threeRows(containerID, inventory, contextualPlayer.getEnderChestInventory());
-                    }, Component.translatable("container.camping.ender_backpack")));
-                }
-
-            }
-            return InteractionResult.CONSUME;
-        }
-    }
-*/
-    @Override
-    public void playerWillDestroy(Level level, BlockPos blockPos, BlockState blockState, Player player) {
-        if (!level.isClientSide) {
-            BlockEntity blockEntity = level.getBlockEntity(blockPos);
-            if (blockEntity instanceof BackpackBlockEntity) {
-                ItemStack itemStack = new ItemStack(blockState.getBlock());
-                CompoundTag tag = new CompoundTag();
-                ((BackpackBlockEntity) blockEntity).saveAdditional(tag);
-                itemStack.addTagElement("BlockEntityTag", tag);
-                double x = blockPos.getX() + 0.5;
-                double y = blockPos.getY() + 0.5;
-                double z = blockPos.getZ() + 0.5;
-                ItemEntity itemEntity = new ItemEntity(level, x, y, z, itemStack);
-                itemEntity.setDefaultPickUpDelay();
-                level.addFreshEntity(itemEntity);
-            }
-        }
-        super.playerWillDestroy(level, blockPos, blockState, player);
+        WANDERER_BACKPACK, LARGE_BACKPACK, SMALL_BACKPACK, WANDERER_BAG, SHEEPBAG, GOODYBAG;
     }
 
-    @Override
-    public @NotNull List<ItemStack> getDrops(BlockState blockState, LootParams.Builder builder) {
-        BlockEntity blockEntity = builder.getOptionalParameter(LootContextParams.BLOCK_ENTITY);
-        if (blockEntity instanceof BackpackBlockEntity) {
-            builder = builder.withDynamicDrop(CONTENTS, (consumer) -> {
-                for (int i = 0; i < ((BackpackBlockEntity) blockEntity).getContainerSize(); ++i) {
-                    consumer.accept(((BackpackBlockEntity) blockEntity).getItems().get(i));
-                }
-            });
-        }
-        return super.getDrops(blockState, builder);
-    }
+//    @Override
+//    public void playerWillDestroy(Level level, BlockPos blockPos, BlockState blockState, Player player) {
+//        if (!level.isClientSide) {
+//            BlockEntity blockEntity = level.getBlockEntity(blockPos);
+//            if (blockEntity instanceof BackpackBlockEntity) {
+//                ItemStack itemStack = new ItemStack(blockState.getBlock());
+//                CompoundTag tag = new CompoundTag();
+//                ((BackpackBlockEntity) blockEntity).saveAdditional(tag);
+//                itemStack.addTagElement("BlockEntityTag", tag);
+//                double x = blockPos.getX() + 0.5;
+//                double y = blockPos.getY() + 0.5;
+//                double z = blockPos.getZ() + 0.5;
+//                ItemEntity itemEntity = new ItemEntity(level, x, y, z, itemStack);
+//                itemEntity.setDefaultPickUpDelay();
+//                level.addFreshEntity(itemEntity);
+//            }
+//        }
+//        super.playerWillDestroy(level, blockPos, blockState, player);
+//    }
 
-    @Override
-    public void setPlacedBy(Level level, BlockPos blockPos, BlockState blockState, LivingEntity livingEntity, ItemStack itemStack) {
-        if (itemStack.hasCustomHoverName()) {
-            BlockEntity blockEntity = level.getBlockEntity(blockPos);
-            if (blockEntity instanceof BackpackBlockEntity) {
-                ((BackpackBlockEntity) blockEntity).setCustomName(itemStack.getHoverName());
-            }
-        }
-    }
+//    @Override
+//    public @NotNull List<ItemStack> getDrops(BlockState blockState, LootParams.Builder builder) {
+//        BlockEntity blockEntity = builder.getOptionalParameter(LootContextParams.BLOCK_ENTITY);
+//        if (blockEntity instanceof BackpackBlockEntity) {
+//            builder = builder.withDynamicDrop(CONTENTS, (consumer) -> {
+//                for (int i = 0; i < ((BackpackBlockEntity) blockEntity).getContainerSize(); ++i) {
+//                    consumer.accept(((BackpackBlockEntity) blockEntity).getItems().get(i));
+//                }
+//            });
+//        }
+//        return super.getDrops(blockState, builder);
+//    }
 
-    @Override
-    public void onRemove(BlockState blockState, Level level, BlockPos blockPos, BlockState newState, boolean isMoving) {
-        if (!blockState.is(newState.getBlock())) {
-            BlockEntity blockEntity = level.getBlockEntity(blockPos);
-            if (blockEntity instanceof BackpackBlockEntity) {
-                level.updateNeighbourForOutputSignal(blockPos, blockState.getBlock());
-            }
-            super.onRemove(blockState, level, blockPos, newState, isMoving);
-        }
-    }
+//    @Override
+//    public void setPlacedBy(Level level, BlockPos blockPos, BlockState blockState, LivingEntity livingEntity, ItemStack itemStack) {
+//        if (itemStack.hasCustomHoverName()) {
+//            BlockEntity blockEntity = level.getBlockEntity(blockPos);
+//            if (blockEntity instanceof BackpackBlockEntity) {
+//                ((BackpackBlockEntity) blockEntity).setCustomName(itemStack.getHoverName());
+//            }
+//        }
+//    }
 
-    @Override
-    public @NotNull ItemStack getCloneItemStack(BlockGetter blockGetter, BlockPos blockPos, BlockState blockState) {
-        ItemStack itemStack = super.getCloneItemStack(blockGetter, blockPos, blockState);
-        blockGetter.getBlockEntity(blockPos, EntityTypeRegistry.BACKPACK_BLOCK_ENTITY.get()).ifPresent(blockEntity -> {
-            CompoundTag tag = new CompoundTag();
-            blockEntity.saveAdditional(tag);
-            itemStack.addTagElement("BlockEntityTag", tag);
-        });
-        return itemStack;
-    }
+//    @Override
+//    public void onRemove(BlockState blockState, Level level, BlockPos blockPos, BlockState newState, boolean isMoving) {
+//        if (!blockState.is(newState.getBlock())) {
+//            BlockEntity blockEntity = level.getBlockEntity(blockPos);
+//            if (blockEntity instanceof BackpackBlockEntity) {
+//                level.updateNeighbourForOutputSignal(blockPos, blockState.getBlock());
+//            }
+//            super.onRemove(blockState, level, blockPos, newState, isMoving);
+//        }
+//    }
+
+//    @Override
+//    public @NotNull ItemStack getCloneItemStack(BlockGetter blockGetter, BlockPos blockPos, BlockState blockState) {
+//        ItemStack itemStack = super.getCloneItemStack(blockGetter, blockPos, blockState);
+//        blockGetter.getBlockEntity(blockPos, EntityTypeRegistry.BACKPACK_BLOCK_ENTITY.get()).ifPresent(blockEntity -> {
+//            CompoundTag tag = new CompoundTag();
+//            blockEntity.saveAdditional(tag);
+//            itemStack.addTagElement("BlockEntityTag", tag);
+//        });
+//        return itemStack;
+//    }
 
     @Override
     public @NotNull RenderShape getRenderShape(BlockState blockState) {

@@ -19,7 +19,7 @@ import net.satisfy.camping.registry.EntityTypeRegistry;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public class BackpackBlockEntity extends BlockEntity implements MenuProvider {
+public class BackpackBlockEntity extends BlockEntity {
     public static final int CONTAINER_SIZE = 24;
     private NonNullList<ItemStack> items = NonNullList.withSize(CONTAINER_SIZE, ItemStack.EMPTY);
     private Component customName;
@@ -47,16 +47,16 @@ public class BackpackBlockEntity extends BlockEntity implements MenuProvider {
         }
     }
 
-    @Override
-    public @NotNull Component getDisplayName() {
-        return this.customName != null ? this.customName : Component.translatable("container.camping.backpack");
-    }
-
-    @Nullable
-    @Override
-    public AbstractContainerMenu createMenu(int syncId, @NotNull Inventory inv, @NotNull Player player) {
-        return new BackpackScreenHandler(syncId, inv, getContainer());
-    }
+//    @Override
+//    public @NotNull Component getDisplayName() {
+//        return this.customName != null ? this.customName : Component.translatable("container.camping.backpack");
+//    }
+//
+//    @Nullable
+//    @Override
+//    public AbstractContainerMenu createMenu(int syncId, @NotNull Inventory inv, @NotNull Player player) {
+//        return new BackpackScreenHandler(syncId, inv, getContainer());
+//    }
 
     public Container getContainer() {
         return new SimpleContainer(this.items.toArray(new ItemStack[0])) {

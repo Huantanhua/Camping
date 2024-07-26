@@ -21,13 +21,13 @@ public class BackpackContainer implements Container, StackedContentsCompatible {
     private ItemStack packStack;
     private NonNullList<ItemStack> stacks = NonNullList.withSize(BackpackBlockEntity.CONTAINER_SIZE, ItemStack.EMPTY);
 
-    public BackpackContainer(ItemStack packStack) {
-        this.packStack = packStack;
-        AtomicInteger index = new AtomicInteger();
-        BackpackItem.getContents(packStack).forEach(
-                stack -> stacks.set(index.getAndIncrement(), stack)
-        );
-    }
+//    public BackpackContainer(ItemStack packStack) {
+//        this.packStack = packStack;
+//        AtomicInteger index = new AtomicInteger();
+//        BackpackItem.getContents(packStack).forEach(
+//                stack -> stacks.set(index.getAndIncrement(), stack)
+//        );
+//    }
 
     @Override
     public int getContainerSize() {
