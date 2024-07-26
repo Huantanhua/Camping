@@ -43,7 +43,6 @@ import java.util.function.Supplier;
 public class BackpackBlock extends BaseEntityBlock implements SimpleWaterloggedBlock {
 
     public static final DirectionProperty FACING = HorizontalDirectionalBlock.FACING;
-    public static final ResourceLocation CONTENTS = new ResourceLocation("contents");
     public static final BooleanProperty WATERLOGGED = BlockStateProperties.WATERLOGGED;
     private final BackpackType backpackType;
 
@@ -52,6 +51,55 @@ public class BackpackBlock extends BaseEntityBlock implements SimpleWaterloggedB
         this.backpackType = backpackType;
         this.registerDefaultState(this.stateDefinition.any().setValue(FACING, Direction.NORTH).setValue(WATERLOGGED, false));
     }
+
+    @Override
+    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
+        builder.add(FACING, WATERLOGGED);
+    }
+
+    public BackpackType getBackpackType() {
+        return this.backpackType;
+    }
+
+
+
+    @Override
+    public boolean hasAnalogOutputSignal(BlockState blockState) {
+        return true;
+    }
+
+    @Override
+    public int getAnalogOutputSignal(BlockState blockState, Level level, BlockPos blockPos) {
+        return AbstractContainerMenu.getRedstoneSignalFromBlockEntity(level.getBlockEntity(blockPos));
+    }
+
+    @Override
+    public @NotNull BlockState rotate(BlockState state, Rotation rotation) {
+        return state.setValue(FACING, rotation.rotate(state.getValue(FACING)));
+    }
+
+    @Override
+    public @NotNull BlockState mirror(BlockState state, Mirror mirror) {
+        return state.rotate(mirror.getRotation(state.getValue(FACING)));
+    }
+
+    @Override
+    public @Nullable BlockState getStateForPlacement(BlockPlaceContext blockPlaceContext) {
+        FluidState fluidState = blockPlaceContext.getLevel().getFluidState(blockPlaceContext.getClickedPos());
+        return this.defaultBlockState().setValue(FACING, blockPlaceContext.getHorizontalDirection().getOpposite()).setValue(WATERLOGGED, fluidState.getType() == Fluids.WATER);
+    }
+
+    @Override
+    public @Nullable BlockEntity newBlockEntity(BlockPos blockPos, BlockState blockState) {
+        return new BackpackBlockEntity(blockPos, blockState);
+    }
+
+    @Override
+    public boolean isPathfindable(BlockState state, BlockGetter world, BlockPos pos, PathComputationType type) {
+        return false;
+    }
+
+    /* VoxelShape */
 
     public static final Map<BackpackType, Map<Direction, VoxelShape>> SHAPES = net.minecraft.Util.make(new HashMap<>(), map -> {
         map.put(BackpackType.SMALL_BACKPACK, generateShapes(BackpackBlockShapes.SMALL_BACKPACK));
@@ -75,124 +123,8 @@ public class BackpackBlock extends BaseEntityBlock implements SimpleWaterloggedB
         return SHAPES.get(backpackType).get(state.getValue(FACING));
     }
 
-    public BackpackType getBackpackType() {
-        return this.backpackType;
-    }
-
-    public enum BackpackType {
-        WANDERER_BACKPACK, LARGE_BACKPACK, SMALL_BACKPACK, WANDERER_BAG, SHEEPBAG, GOODYBAG;
-    }
-
-//    @Override
-//    public void playerWillDestroy(Level level, BlockPos blockPos, BlockState blockState, Player player) {
-//        if (!level.isClientSide) {
-//            BlockEntity blockEntity = level.getBlockEntity(blockPos);
-//            if (blockEntity instanceof BackpackBlockEntity) {
-//                ItemStack itemStack = new ItemStack(blockState.getBlock());
-//                CompoundTag tag = new CompoundTag();
-//                ((BackpackBlockEntity) blockEntity).saveAdditional(tag);
-//                itemStack.addTagElement("BlockEntityTag", tag);
-//                double x = blockPos.getX() + 0.5;
-//                double y = blockPos.getY() + 0.5;
-//                double z = blockPos.getZ() + 0.5;
-//                ItemEntity itemEntity = new ItemEntity(level, x, y, z, itemStack);
-//                itemEntity.setDefaultPickUpDelay();
-//                level.addFreshEntity(itemEntity);
-//            }
-//        }
-//        super.playerWillDestroy(level, blockPos, blockState, player);
-//    }
-
-//    @Override
-//    public @NotNull List<ItemStack> getDrops(BlockState blockState, LootParams.Builder builder) {
-//        BlockEntity blockEntity = builder.getOptionalParameter(LootContextParams.BLOCK_ENTITY);
-//        if (blockEntity instanceof BackpackBlockEntity) {
-//            builder = builder.withDynamicDrop(CONTENTS, (consumer) -> {
-//                for (int i = 0; i < ((BackpackBlockEntity) blockEntity).getContainerSize(); ++i) {
-//                    consumer.accept(((BackpackBlockEntity) blockEntity).getItems().get(i));
-//                }
-//            });
-//        }
-//        return super.getDrops(blockState, builder);
-//    }
-
-//    @Override
-//    public void setPlacedBy(Level level, BlockPos blockPos, BlockState blockState, LivingEntity livingEntity, ItemStack itemStack) {
-//        if (itemStack.hasCustomHoverName()) {
-//            BlockEntity blockEntity = level.getBlockEntity(blockPos);
-//            if (blockEntity instanceof BackpackBlockEntity) {
-//                ((BackpackBlockEntity) blockEntity).setCustomName(itemStack.getHoverName());
-//            }
-//        }
-//    }
-
-//    @Override
-//    public void onRemove(BlockState blockState, Level level, BlockPos blockPos, BlockState newState, boolean isMoving) {
-//        if (!blockState.is(newState.getBlock())) {
-//            BlockEntity blockEntity = level.getBlockEntity(blockPos);
-//            if (blockEntity instanceof BackpackBlockEntity) {
-//                level.updateNeighbourForOutputSignal(blockPos, blockState.getBlock());
-//            }
-//            super.onRemove(blockState, level, blockPos, newState, isMoving);
-//        }
-//    }
-
-//    @Override
-//    public @NotNull ItemStack getCloneItemStack(BlockGetter blockGetter, BlockPos blockPos, BlockState blockState) {
-//        ItemStack itemStack = super.getCloneItemStack(blockGetter, blockPos, blockState);
-//        blockGetter.getBlockEntity(blockPos, EntityTypeRegistry.BACKPACK_BLOCK_ENTITY.get()).ifPresent(blockEntity -> {
-//            CompoundTag tag = new CompoundTag();
-//            blockEntity.saveAdditional(tag);
-//            itemStack.addTagElement("BlockEntityTag", tag);
-//        });
-//        return itemStack;
-//    }
-
     @Override
     public @NotNull RenderShape getRenderShape(BlockState blockState) {
         return RenderShape.MODEL;
-    }
-
-    @Override
-    public boolean hasAnalogOutputSignal(BlockState blockState) {
-        return true;
-    }
-
-    @Override
-    public int getAnalogOutputSignal(BlockState blockState, Level level, BlockPos blockPos) {
-        return AbstractContainerMenu.getRedstoneSignalFromBlockEntity(level.getBlockEntity(blockPos));
-    }
-
-    @Override
-    public @NotNull BlockState rotate(BlockState state, Rotation rotation) {
-        return state.setValue(FACING, rotation.rotate(state.getValue(FACING)));
-    }
-
-    @Override
-    public @NotNull BlockState mirror(BlockState state, Mirror mirror) {
-        return state.rotate(mirror.getRotation(state.getValue(FACING)));
-    }
-
-    @Nullable
-    @Override
-    public BlockState getStateForPlacement(BlockPlaceContext blockPlaceContext) {
-        FluidState fluidState = blockPlaceContext.getLevel().getFluidState(blockPlaceContext.getClickedPos());
-        return this.defaultBlockState().setValue(FACING, blockPlaceContext.getHorizontalDirection().getOpposite()).setValue(WATERLOGGED, fluidState.getType() == Fluids.WATER);
-    }
-
-    @Nullable
-    @Override
-    public BlockEntity newBlockEntity(BlockPos blockPos, BlockState blockState) {
-        return new BackpackBlockEntity(blockPos, blockState);
-    }
-
-    @Override
-    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
-        builder.add(FACING, WATERLOGGED);
-    }
-
-    @Override
-    public boolean isPathfindable(BlockState state, BlockGetter world, BlockPos pos, PathComputationType type) {
-        return false;
     }
 }

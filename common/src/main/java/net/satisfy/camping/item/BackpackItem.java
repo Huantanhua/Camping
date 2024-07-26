@@ -13,6 +13,7 @@ import net.minecraft.world.inventory.tooltip.TooltipComponent;
 import net.minecraft.world.item.*;
 import net.minecraft.world.level.block.Block;
 import net.satisfy.camping.block.BackpackBlock;
+import net.satisfy.camping.block.BackpackType;
 import net.satisfy.camping.block.entity.BackpackBlockEntity;
 import org.jetbrains.annotations.NotNull;
 
@@ -23,7 +24,7 @@ import java.util.stream.Stream;
 public class BackpackItem extends BlockItem implements Equipable {
 
     private final ResourceLocation backpackTexture;
-    public final BackpackBlock.BackpackType backpackType;
+    public final BackpackType backpackType;
 
     public BackpackItem(Block block, ResourceLocation backpackTexture) {
         super(block, new Properties().fireResistant().stacksTo(1));
@@ -31,45 +32,6 @@ public class BackpackItem extends BlockItem implements Equipable {
         this.backpackType = ((BackpackBlock) block).getBackpackType();
         this.backpackTexture = backpackTexture;
     }
-
-//    public static Stream<ItemStack> getContents(ItemStack itemStack) {
-//        CompoundTag compoundTag = itemStack.getTag();
-//        if (compoundTag == null) {
-//            return Stream.empty();
-//        } else {
-//            CompoundTag compoundTag2 = compoundTag.getCompound("BlockEntityTag");
-//            ListTag listTag = compoundTag2.getList("Items", 10);
-//            Stream<Tag> items = listTag.stream();
-//            Objects.requireNonNull(CompoundTag.class);
-//            return items.map(CompoundTag.class::cast).map(ItemStack::of);
-//        }
-//    }
-
-//    public @NotNull Optional<TooltipComponent> getTooltipImage(ItemStack itemStack) {
-//        NonNullList<ItemStack> nonNullList = NonNullList.withSize(BackpackBlockEntity.CONTAINER_SIZE, ItemStack.EMPTY);
-//        int index = 0;
-//
-//        for (ItemStack stack : (Iterable<ItemStack>) getContents(itemStack)::iterator) {
-//            nonNullList.set(index++, stack);
-//        }
-//        return Optional.of(new BundleTooltip(nonNullList, 64));
-//    }
-
-//    public static BackpackContainer getContainer(ItemStack stack) {
-//        BackpackContainer container = new BackpackContainer(stack);
-//        NonNullList<ItemStack> items = NonNullList.withSize(BackpackBlockEntity.CONTAINER_SIZE, ItemStack.EMPTY);
-//
-//        int index = 0;
-//        for (ItemStack itemStack : (Iterable<ItemStack>) getContents(stack)::iterator) {
-//            items.set(index++, itemStack);
-//        }
-//
-//        for (int i = 0; i < items.size(); i++) {
-//            container.setItem(i, items.get(i));
-//        }
-//
-//        return container;
-//    }
 
     public ResourceLocation getBackpackTexture() {
         return backpackTexture;
@@ -84,5 +46,4 @@ public class BackpackItem extends BlockItem implements Equipable {
     public @NotNull SoundEvent getEquipSound() {
         return ArmorMaterials.LEATHER.getEquipSound();
     }
-    
 }
