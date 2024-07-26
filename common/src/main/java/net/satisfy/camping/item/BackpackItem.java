@@ -22,18 +22,14 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 public class BackpackItem extends BlockItem implements Equipable {
-    protected final ArmorMaterial material;
-    protected final ArmorItem.Type type;
     private final ResourceLocation backpackTexture;
 
     public final BackpackBlock.BackpackType backpackType;
 
-    public BackpackItem(Block block, Properties settings, ArmorMaterial material, ArmorItem.Type type, ResourceLocation backpackTexture) {
-        super(block, settings.stacksTo(1));
+    public BackpackItem(Block block, ResourceLocation backpackTexture) {
+        super(block, new Properties().fireResistant().stacksTo(1));
 
         this.backpackType = ((BackpackBlock) block).getBackpackType();
-        this.material = material;
-        this.type = type;
         this.backpackTexture = backpackTexture;
     }
 
@@ -82,12 +78,12 @@ public class BackpackItem extends BlockItem implements Equipable {
 
     @Override
     public @NotNull EquipmentSlot getEquipmentSlot() {
-        return this.type.getSlot();
+        return EquipmentSlot.CHEST;
     }
 
     @Override
     public @NotNull SoundEvent getEquipSound() {
-        return this.material.getEquipSound();
+        return ArmorMaterials.LEATHER.getEquipSound();
     }
     
 }
