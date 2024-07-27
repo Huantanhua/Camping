@@ -1,25 +1,42 @@
-package net.satisfy.camping.block;
+package net.satisfy.camping.inventory;
 
 import net.minecraft.core.NonNullList;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.world.Container;
 import net.minecraft.world.ContainerHelper;
+import net.minecraft.world.ContainerListener;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.player.StackedContents;
 import net.minecraft.world.inventory.StackedContentsCompatible;
 import net.minecraft.world.item.ItemStack;
 import net.satisfy.camping.block.entity.BackpackBlockEntity;
-import net.satisfy.camping.item.BackpackItem;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
+import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 
 public class BackpackContainer implements Container, StackedContentsCompatible {
 
-    private ItemStack packStack;
+//    private ItemStack packStack;
     private NonNullList<ItemStack> stacks = NonNullList.withSize(BackpackBlockEntity.CONTAINER_SIZE, ItemStack.EMPTY);
+
+    @Nullable
+    private List<ContainerListener> listeners;
+
+    private @Nullable Player player;
+
+    public BackpackContainer(NonNullList<ItemStack> itemStacks) {
+        this.stacks = itemStacks;
+    }
+
+    public BackpackContainer(NonNullList<ItemStack> itemStacks, Player player) {
+        this.stacks = itemStacks;
+        this.player = player;
+    }
 
 //    public BackpackContainer(ItemStack packStack) {
 //        this.packStack = packStack;
@@ -38,51 +55,29 @@ public class BackpackContainer implements Container, StackedContentsCompatible {
     public boolean isEmpty() { return false; }
 
     @Override
-    public ItemStack getItem(int i) {
+    public @NotNull ItemStack getItem(int i) {
         return stacks.get(i);
     }
 
     @Override
-    public ItemStack removeItem(int i, int j) {
-        ItemStack itemStack = ContainerHelper.removeItem(this.stacks, i, j);
-        if (!itemStack.isEmpty()) {
-            this.setChanged();
-        }
-
-        return itemStack;
+    public @NotNull ItemStack removeItem(int i, int j) {
+        return ContainerHelper.removeItem(stacks, i, j);
     }
 
     @Override
-    public ItemStack removeItemNoUpdate(int i) {
-        ItemStack itemStack = this.stacks.get(i);
-        if (itemStack.isEmpty()) {
-            return ItemStack.EMPTY;
-        } else {
-            this.stacks.set(i, ItemStack.EMPTY);
-            setStackNbt(i, ItemStack.EMPTY);
-            return itemStack;
-        }
+    public @NotNull ItemStack removeItemNoUpdate(int i) {
+        return ContainerHelper.takeItem(this.stacks, i);
     }
 
     @Override
     public void setItem(int i, ItemStack itemStack) {
-        this.stacks.set(i, itemStack);
-        if (!itemStack.isEmpty() && itemStack.getCount() > this.getMaxStackSize()) {
-            itemStack.setCount(this.getMaxStackSize());
-        }
-
+        stacks.set(i, itemStack);
         this.setChanged();
     }
 
     @Override
-    public void setChanged() {
-        AtomicInteger counter = new AtomicInteger();
-        this.stacks.forEach(stack -> setStackNbt(counter.getAndIncrement(), stack));
-    }
-
-    @Override
     public boolean stillValid(Player player) {
-        return true;
+        return !player.isDeadOrDying();
     }
 
     @Override
@@ -100,19 +95,66 @@ public class BackpackContainer implements Container, StackedContentsCompatible {
     }
 
     private void setStackNbt(int i, ItemStack stack) {
-        CompoundTag tag = packStack.getOrCreateTag();
+
+//        if (this.player == null) {
+//            return;
+//        }
+//
+//        ItemStack itemStack = this.player.getMainHandItem();
+//
+//        CompoundTag compoundTag = BlockItem.getBlockEntityData(itemStack);
+//
+//        if (compoundTag != null) {
+//            if (compoundTag.contains("Items", 9)) {
+//                NonNullList<ItemStack> nonNullList = NonNullList.withSize(24, ItemStack.EMPTY);
+//                ContainerHelper.loadAllItems(compoundTag, nonNullList);
+//            }
+//        }
+
+        CompoundTag tag = stack.getOrCreateTag();
         CompoundTag compoundTag2 = tag.getCompound("BlockEntityTag");
-        ListTag listTag = compoundTag2.getList("Items", 10);
+        ListTag listTag = compoundTag2.getList("Items", 9);
         if (listTag.isEmpty()) {
             listTag = new ListTag();
             listTag.addAll(
                     NonNullList.withSize(BackpackBlockEntity.CONTAINER_SIZE, new CompoundTag())
             );
         }
+
+
         listTag.set(i, stack.save(new CompoundTag()));
         compoundTag2.put("Items", listTag);
         tag.put("BlockEntityTag", compoundTag2);
-        packStack.setTag(tag);
+        stack.setTag(tag);
+
+    }
+
+//    @Override
+//    public void setChanged() {
+//
+//
+//
+//        AtomicInteger counter = new AtomicInteger();
+//        this.stacks.forEach(stack -> setStackNbt(counter.getAndIncrement(), stack));
+//
+////        if (this.player == null || player.level().isClientSide()) {
+////            return;
+////        }
+////
+////        System.out.println("called setChanged");
+//    }
+
+    @Override
+    public void setChanged() {
+        if (this.listeners != null) {
+            Iterator var1 = this.listeners.iterator();
+
+            while(var1.hasNext()) {
+                ContainerListener containerListener = (ContainerListener)var1.next();
+                containerListener.containerChanged(this);
+            }
+        }
+
     }
 
     public List<ItemStack> getStacks() {
